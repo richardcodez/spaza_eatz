@@ -1,12 +1,16 @@
 package com.richardcodez.spaza_eatz.service.product;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
 import com.richardcodez.spaza_eatz.exceptions.ProductNotFoundException;
+import com.richardcodez.spaza_eatz.model.Category;
 import com.richardcodez.spaza_eatz.model.Product;
+import com.richardcodez.spaza_eatz.repository.CategoryRepository;
 import com.richardcodez.spaza_eatz.repository.ProductRepository;
+import com.richardcodez.spaza_eatz.request.AddProductRequest;
 
 import lombok.RequiredArgsConstructor;
 
@@ -15,11 +19,27 @@ import lombok.RequiredArgsConstructor;
 public class ProductService implements IProductService {
 
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
 
     @Override
-    public Product addProduct(Product product) {
-        // TODO Auto-generated method stub
+    public Product addProduct(AddProductRequest request) {
+        // Check if category is found in the DB
+        // if Yes, set it as a new product category
+        // if No, then save it as a new category
+        // Then set it as a new product category
+        Category category = Optional.ofNullable(categoryRepository.findByName(request.getCategory().getName()))
         return null;
+    }
+
+    private Product createProduct(AddProductRequest request, Category category) {
+        return new Product(
+            request.getName(),
+            request.getBrand(),
+            request.getPrice(),
+            request.getInventory(),
+            request.getDescription(),
+            category
+        );
     }
 
     @Override
