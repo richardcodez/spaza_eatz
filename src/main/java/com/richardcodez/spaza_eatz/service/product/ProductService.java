@@ -11,6 +11,7 @@ import com.richardcodez.spaza_eatz.model.Product;
 import com.richardcodez.spaza_eatz.repository.CategoryRepository;
 import com.richardcodez.spaza_eatz.repository.ProductRepository;
 import com.richardcodez.spaza_eatz.request.AddProductRequest;
+import com.richardcodez.spaza_eatz.request.UpdateProductRequest;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,9 +29,15 @@ public class ProductService implements IProductService {
         // if No, then save it as a new category
         // Then set it as a new product category
         Category category = Optional.ofNullable(categoryRepository.findByName(request.getCategory().getName()))
-        return null;
+        .orElseGet(()->{
+            Category newCategory = new Category(request.getCategory().getName());
+            return categoryRepository.save(newCategory);
+        });
+        request.setCategory(category);
+        return productRepository.save(createProduct(request, category));
     }
 
+    // Helper method for AddProduct method
     private Product createProduct(AddProductRequest request, Category category) {
         return new Product(
             request.getName(),
@@ -91,9 +98,25 @@ public class ProductService implements IProductService {
     }
 
     @Override
-    public void updateProduct(Product product, Long productId) {
-        // TODO Auto-generated method stub
-        
+    public Product updateProduct(UpdateProductRequest request, Long productId) {
+        return productRepository.findById(productId)
+                .map(existingProduct -> updateExistingProduct(existingProduct, request))
+                .map(productRepository::save)
+                .orElseThrow(()-> new ProductNotFoundException("Product not found"));
+    }
+
+    // Helper method for updateproduct: Above
+    private Product updateExistingProduct(Product existingProduct, UpdateProductRequest request) {
+        existingProduct.setName(request.getName());
+        existingProduct.setBrand(request.getBrand());
+        existingProduct.setPrice(request.getPrice());
+        existingProduct.setInventory(request.getInventory());
+        existingProduct.setDescription(request.getDescription());
+        Category category = categoryRepository.findByName(request.getCategory().getName());
+        existingProduct.setName(request.getName());
+        existingProduct.setCategory(category);
+        return existingProduct;
+
     }
 
 }

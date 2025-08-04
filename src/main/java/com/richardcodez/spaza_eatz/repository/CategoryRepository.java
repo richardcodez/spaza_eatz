@@ -6,6 +6,6 @@ import com.richardcodez.spaza_eatz.model.Category;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-    Object findByName(java.util.Locale.Category category);
+    Category findByName(String name);
 
 }
