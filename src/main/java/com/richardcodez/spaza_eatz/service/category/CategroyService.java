@@ -1,9 +1,11 @@
 package com.richardcodez.spaza_eatz.service.category;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.richardcodez.spaza_eatz.exceptions.AlreadyExistsException;
 import com.richardcodez.spaza_eatz.exceptions.ResourceNotFoundException;
 import com.richardcodez.spaza_eatz.model.Category;
 import com.richardcodez.spaza_eatz.repository.CategoryRepository;
@@ -18,8 +20,8 @@ public class CategroyService implements ICategroyService {
 
     @Override
     public Category addCategory(Category category) {
-        // TODO Auto-generated method stub
-        return null;
+        return Optional.of(category).filter(c -> !categoryRepository.existsByName(c.getName()))
+                .map(categoryRepository::save).orElseThrow(() -> new AlreadyExistsException(category.getName() + "Already exists"));
     }
 
     @Override
@@ -47,7 +49,10 @@ public class CategroyService implements ICategroyService {
 
     @Override
     public Category updatecategory(Category category, Long Id) {
-        return null;
+        return Optional.ofNullable(getCategoryById(Id)).map(oldCategory -> {
+            oldCategory.setName(category.getName());
+            return categoryRepository.save(oldCategory);
+        }).orElseThrow(() -> new ResourceNotFoundException("Category not found"));
     }
 
 }
